@@ -1,115 +1,81 @@
-import os
-import datetime as dt
-import pytz
 import streamlit as st
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+import datetime as dt
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 
-# --- Función para guardar en Google Sheets ---
-def guardar_en_google_sheets(datos_reserva):
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], scope)
-    client = gspread.authorize(creds)
+# Configuración de credenciales desde secrets
+credentials = service_account.Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"],
+    scopes=["https://www.googleapis.com/auth/calendar"]
+)
 
-    try:
-        hoja = client.open("Reservas C-LAB").sheet1
+# Inicialización de la API de Google Calendar
+calendar_id = st.secrets["calendar_id"]
+calendar = build("calendar", "v3", credentials=credentials)
 
-        fila = [
-            datos_reserva["Nombre"],
-            datos_reserva["Correo"],
-            datos_reserva["Fecha"],
-            datos_reserva["Hora de inicio"],
-            datos_reserva["Hora de término"],
-            datos_reserva["Implementos"],
-            datos_reserva["Motivo"]
-        ]
+# Título de la app
+st.title("🗕 C-LAB Agenda")
 
-        hoja.append_row(fila)
-    except Exception as e:
-        st.error(f"❌ Error al guardar la reserva en Google Sheets: {e}")
+# --- 1. Subir archivo: Protocolo del CEC ---
+st.header("📄 Ingresar Protocolo del CEC")
+archivo = st.file_uploader("Sube tu protocolo (PDF, Word, etc.)", type=["pdf", "docx", "doc"])
 
-# --- Clase para gestionar Google Calendar ---
-SCOPES = ["https://www.googleapis.com/auth/calendar"]
+if archivo is not None:
+    st.success(f"Archivo '{archivo.name}' cargado correctamente.")
+    # Aquí podrías subirlo a Google Drive si deseas
 
-class GoogleCalendarManager:
-    def __init__(self):
-        creds = service_account.Credentials.from_service_account_info(
-            st.secrets["gcp_service_account"], scopes=SCOPES
-        )
-        self.service = build("calendar", "v3", credentials=creds)
+# --- 2. Ver horas disponibles tipo agenda médica ---
+st.header("🕒 Ver horas disponibles")
+fecha_seleccionada = st.date_input("Selecciona una fecha", dt.date.today())
 
-    def create_event(self, summary, start_time, end_time, timezone='America/Santiago'):
-        event = {
-            'summary': summary,
-            'start': {'dateTime': start_time, 'timeZone': timezone},
-            'end': {'dateTime': end_time, 'timeZone': timezone}
-        }
+# Crear bloques de 30 minutos entre 9:00 y 18:00
+bloques_horarios = [dt.time(h, m) for h in range(9, 18) for m in (0, 30)]
 
-        try:
-            event = self.service.events().insert(
-                calendarId="c-lab-agenda@c-lab-app.iam.gserviceaccount.com", body=event).execute()
-            return event.get('htmlLink')
-        except HttpError as error:
-            return f"Ocurrió un error al crear el evento: {error}"
+# Función para obtener eventos del día seleccionado
+def obtener_eventos_del_dia(fecha):
+    inicio = dt.datetime.combine(fecha, dt.time(0, 0)).isoformat() + 'Z'
+    fin = dt.datetime.combine(fecha, dt.time(23, 59)).isoformat() + 'Z'
+    eventos_resultado = calendar.events().list(
+        calendarId=calendar_id,
+        timeMin=inicio,
+        timeMax=fin,
+        singleEvents=True,
+        orderBy="startTime"
+    ).execute()
+    eventos = eventos_resultado.get("items", [])
+    ocupados = []
+    for evento in eventos:
+        start = evento["start"].get("dateTime")
+        if start:
+            start_dt = dt.datetime.fromisoformat(start)
+            ocupados.append(start_dt.time())
+    return ocupados
 
-# --- Interfaz de Streamlit ---
-st.image("logo_11.png", width=180)
-st.title("Reserva de Horas C-LAB")
-st.markdown("Gracias por ingresar a la agenda de uso del laboratorio C-LAB. Por favor completa los datos para reservar.")
+ocupados = obtener_eventos_del_dia(fecha_seleccionada)
 
-calendar = GoogleCalendarManager()
+# Mostrar disponibilidad
+for hora in bloques_horarios:
+    estado = "⛔ Ocupado" if hora in ocupados else "✅ Disponible"
+    st.write(f"{hora.strftime('%H:%M')} - {estado}")
 
-with st.form(key='appointment_form'):
-    nombre = st.text_input("Ingresa tu nombre")
-    correo = st.text_input("Ingresa tu correo electrónico")  # Opcional pero útil
-    motivo = st.text_input("Motivo de reserva")
-    equipos = st.multiselect(
-        "Selecciona los equipos que vas a utilizar:",
-        [
-            "MediaRecorder", "FaceReader", "The Observer XT", 
-            "Tobii Glasses 3", "Tobii Glasses 2", "Tobii Spectrum", 
-            "Biopac Acqknowledge", "Computadores", "Otro/no lo sé", "Ninguno"
-        ]
-    )
-    fecha = st.date_input("Selecciona el día de tu reserva", dt.date.today())
-    hora_inicio = st.time_input("Hora de inicio", dt.time(9, 0))
-    hora_fin = st.time_input("Hora de fin", dt.time(10, 0))
-    
-    submitted = st.form_submit_button("Agendar hora")
+# --- 3. Crear evento (reserva) ---
+st.header("📌 Reserva una hora")
+nombre = st.text_input("Tu nombre completo")
+motivo = st.text_input("Motivo de uso del laboratorio")
+fecha = st.date_input("Fecha de reserva", dt.date.today())
+hora = st.time_input("Hora de inicio", dt.time(9, 0))
+duracion = st.slider("Duración (en minutos)", 30, 180, 60, step=30)
 
-if submitted:
-    if not nombre or not motivo or not correo:
-        st.error("Por favor, completa todos los campos obligatorios.")
-    else:
-        tz = pytz.timezone('America/Santiago')
-        start_datetime = tz.localize(dt.datetime.combine(fecha, hora_inicio))
-        end_datetime = tz.localize(dt.datetime.combine(fecha, hora_fin))
+if st.button("Agendar hora"):
+    inicio = dt.datetime.combine(fecha, hora)
+    fin = inicio + dt.timedelta(minutes=duracion)
 
-        if start_datetime < dt.datetime.now(tz):
-            st.warning("No puedes agendar en una hora pasada.")
-        else:
-            resumen = f"{nombre} - {motivo} | Equipos: {', '.join(equipos)}"
-            event_link = calendar.create_event(
-                summary=resumen,
-                start_time=start_datetime.isoformat(),
-                end_time=end_datetime.isoformat()
-            )
-            if isinstance(event_link, str) and event_link.startswith("http"):
-                st.success("✅ Reserva creada exitosamente. Recuerda asistir y ¡ten un buen día!")
-                st.markdown(f"[Ver evento en Google Calendar]({event_link})")
+    evento = {
+        "summary": f"{nombre} - {motivo}",
+        "start": {"dateTime": inicio.isoformat(), "timeZone": "America/Santiago"},
+        "end": {"dateTime": fin.isoformat(), "timeZone": "America/Santiago"}
+    }
 
-                datos_reserva = {
-                    "Nombre": nombre,
-                    "Correo": correo,
-                    "Fecha": str(fecha),
-                    "Hora de inicio": hora_inicio.strftime("%H:%M"),
-                    "Hora de término": hora_fin.strftime("%H:%M"),
-                    "Implementos": ", ".join(equipos),
-                    "Motivo": motivo
-                }
-                guardar_en_google_sheets(datos_reserva)
-            else:
-                st.error(f"❌ Error al crear la reserva: {event_link}")
+    creado = calendar.events().insert(calendarId=calendar_id, body=evento).execute()
+    st.success("✅ Reserva realizada correctamente!")
+    st.balloons()
