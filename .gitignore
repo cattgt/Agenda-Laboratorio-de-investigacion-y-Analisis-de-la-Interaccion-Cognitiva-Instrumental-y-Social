@@ -1,0 +1,10 @@
+# Evitar subir credenciales sensibles
+*.json
+service_account.json
+
+# Archivos de sistema
+__pycache__/
+*.pyc
+
+# Archivos de configuración local
+.streamlit/secrets.toml
