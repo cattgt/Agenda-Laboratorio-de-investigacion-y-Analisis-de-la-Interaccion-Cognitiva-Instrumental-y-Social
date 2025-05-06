@@ -14,36 +14,32 @@ def guardar_en_google_sheets(datos_reserva):
     creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], scope)
     client = gspread.authorize(creds)
 
-    hoja = client.open("Reservas C-LAB").sheet1
+    try:
+        hoja = client.open("Reservas C-LAB").sheet1
 
-    fila = [
-        datos_reserva["Nombre"],
-        datos_reserva["Correo"],
-        datos_reserva["Fecha"],
-        datos_reserva["Hora de inicio"],
-        datos_reserva["Hora de término"],
-        datos_reserva["Implementos"],
-        datos_reserva["Motivo"]
-    ]
+        fila = [
+            datos_reserva["Nombre"],
+            datos_reserva["Correo"],
+            datos_reserva["Fecha"],
+            datos_reserva["Hora de inicio"],
+            datos_reserva["Hora de término"],
+            datos_reserva["Implementos"],
+            datos_reserva["Motivo"]
+        ]
 
-    hoja.append_row(fila)
+        hoja.append_row(fila)
+    except Exception as e:
+        st.error(f"❌ Error al guardar la reserva en Google Sheets: {e}")
 
 # --- Clase para gestionar Google Calendar ---
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
 class GoogleCalendarManager:
     def __init__(self):
-        self.service = self._authenticate()
-
-    def _authenticate(self):
-        if os.path.exists("service_account.json"):
-            creds = service_account.Credentials.from_service_account_file(
-                "service_account.json", scopes=SCOPES
-            )
-        else:
-            raise FileNotFoundError("El archivo service_account.json no se encontró")
-
-        return build("calendar", "v3", credentials=creds)
+        creds = service_account.Credentials.from_service_account_info(
+            st.secrets["gcp_service_account"], scopes=SCOPES
+        )
+        self.service = build("calendar", "v3", credentials=creds)
 
     def create_event(self, summary, start_time, end_time, timezone='America/Santiago'):
         event = {
