@@ -1,6 +1,7 @@
 import os.path
 import datetime as dt
 import pytz
+import streamlit as st
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -12,18 +13,9 @@ class GoogleCalendarManager:
         self.service = self._authenticate()
 
     def _authenticate(self):
-        creds = None
-        # Ruta al archivo de credenciales de la cuenta de servicio
-        service_account_file = "service_account.json"
-
-        if os.path.exists(service_account_file):
-            creds = service_account.Credentials.from_service_account_file(
-                service_account_file, scopes=SCOPES
-            )
-        else:
-            raise FileNotFoundError("El archivo de credenciales no se encuentra.")
-        
-        # Construir el servicio de Google Calendar con las credenciales
+        creds = service_account.Credentials.from_service_account_info(
+            st.secrets["gcp_service_account"], scopes=SCOPES
+        )
         return build("calendar", "v3", credentials=creds)
 
     def list_upcoming_events(self, max_results=10):
@@ -102,10 +94,6 @@ class GoogleCalendarManager:
             print(f"Ocurrió un error al eliminar el evento: {error}")
             return False
 
-
-# Ejecutar para probar conexión
 if __name__ == "__main__":
     calendar = GoogleCalendarManager()
     calendar.list_upcoming_events()
-
-
