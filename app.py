@@ -14,7 +14,7 @@ calendar_id = st.secrets["calendar_id"]
 calendar = build("calendar", "v3", credentials=credentials)
 
 # Título de la app
-st.title("🗕 C-LAB Agenda")
+st.title("AGENDA LABORATORIO DE INVESTIGACION Y ANALISIS DE LA INTERACCION COGNITIVA, INSTRUMENTAL Y SOCIAL")
 
 # --- 1. Subir archivo: Protocolo del CEC ---
 st.header("📄 Ingresar Protocolo del CEC")
