@@ -13,8 +13,32 @@ credentials = service_account.Credentials.from_service_account_info(
 calendar_id = st.secrets["calendar_id"]
 calendar = build("calendar", "v3", credentials=credentials)
 
-# Título de la app
-st.title("AGENDA LABORATORIO DE INVESTIGACION Y ANALISIS DE LA INTERACCION COGNITIVA, INSTRUMENTAL Y SOCIAL")
+# Título de la app con color personalizado
+st.markdown(
+    """
+    <style>
+        .title {
+            font-size: 36px;
+            color: #00BFFF;  /* Azul cielo */
+            text-align: center;
+        }
+        .available {
+            background-color: #98FB98;  /* Verde claro */
+            color: black;
+            font-weight: bold;
+        }
+        .occupied {
+            background-color: #FF6347;  /* Rojo tomate */
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Título
+st.markdown('<div class="title">AGENDA LABORATORIO DE INVESTIGACION Y ANALISIS DE LA INTERACCION COGNITIVA, INSTRUMENTAL Y SOCIAL</div>', unsafe_allow_html=True)
 
 # --- 1. Subir archivo: Protocolo del CEC ---
 st.header("📄 Ingresar Protocolo del CEC")
@@ -22,7 +46,6 @@ archivo = st.file_uploader("Sube tu protocolo (PDF, Word, etc.)", type=["pdf", "
 
 if archivo is not None:
     st.success(f"Archivo '{archivo.name}' cargado correctamente.")
-    # Aquí podrías subirlo a Google Drive si deseas
 
 # --- 2. Ver horas disponibles tipo agenda médica ---
 st.header("🕒 Ver horas disponibles")
@@ -53,10 +76,11 @@ def obtener_eventos_del_dia(fecha):
 
 ocupados = obtener_eventos_del_dia(fecha_seleccionada)
 
-# Mostrar disponibilidad
+# Mostrar disponibilidad con color
 for hora in bloques_horarios:
     estado = "⛔ Ocupado" if hora in ocupados else "✅ Disponible"
-    st.write(f"{hora.strftime('%H:%M')} - {estado}")
+    clase = "occupied" if hora in ocupados else "available"
+    st.markdown(f'<div class="{clase}">{hora.strftime("%H:%M")} - {estado}</div>', unsafe_allow_html=True)
 
 # --- 3. Crear evento (reserva) ---
 st.header("📌 Reserva una hora")
