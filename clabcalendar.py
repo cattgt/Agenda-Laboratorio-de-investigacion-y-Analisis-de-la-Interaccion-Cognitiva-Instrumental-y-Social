@@ -15,6 +15,8 @@ SCOPES = [
 
 CALENDAR_ID = 'c-lab-agenda@c-lab-app.iam.gserviceaccount.com'
 TIMEZONE = 'America/Santiago'
+SPREADSHEET_ID = '1uZ2-EKjvWFKTo8V7VtQEN26Vgce6kccXy3yzX2le06w'
+SHEET_NAME = 'Reservas'
 
 class GoogleCalendarManager:
     def __init__(self):
@@ -90,3 +92,19 @@ class GoogleCalendarManager:
         except HttpError as error:
             print(f"❌ Error al eliminar el evento: {error}")
             return False
+
+    def append_to_sheet(self, values):
+        try:
+            sheets_service = build("sheets", "v4", credentials=self.service._http.credentials)
+            body = {"values": [values]}
+            result = sheets_service.spreadsheets().values().append(
+                spreadsheetId=SPREADSHEET_ID,
+                range=f"{SHEET_NAME}!A1",
+                valueInputOption="RAW",
+                insertDataOption="INSERT_ROWS",
+                body=body
+            ).execute()
+            return result
+        except HttpError as error:
+            print(f"❌ Error al escribir en Google Sheets: {error}")
+            return None
