@@ -50,9 +50,10 @@ class GoogleCalendarManager:
             print(f"❌ Error al listar eventos: {error}")
             return []
 
-    def create_event(self, summary, start_time, end_time, attendees=None):
+    def create_event(self, summary, start_time, end_time, attendees=None, description=""):
         event = {
             'summary': summary,
+            'description': description,
             'start': {'dateTime': start_time, 'timeZone': TIMEZONE},
             'end': {'dateTime': end_time, 'timeZone': TIMEZONE}
         }
