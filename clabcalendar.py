@@ -13,7 +13,7 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive"
 ]
 
-CALENDAR_ID = 'c-lab-agenda@c-lab-app.iam.gserviceaccount.com'
+CALENDAR_ID = '1e2385c410653a58928207f870002e8a4a03683d51de7b0c3ae768fd98e88e73@group.calendar.google.com'
 TIMEZONE = 'America/Santiago'
 SPREADSHEET_ID = '1uZ2-EKjvWFKTo8V7VtQEN26Vgce6kccXy3yzX2le06w'
 SHEET_NAME = 'Reservas'

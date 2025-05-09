@@ -2,6 +2,9 @@ import streamlit as st
 import datetime as dt
 from clabcalendar import GoogleCalendarManager
 
+# Mostrar logotipo al inicio
+st.image("logo_11.png", width=150)  # Puedes ajustar el ancho según prefieras
+
 # Inicializa el manejador de calendario
 calendar_manager = GoogleCalendarManager()
 
