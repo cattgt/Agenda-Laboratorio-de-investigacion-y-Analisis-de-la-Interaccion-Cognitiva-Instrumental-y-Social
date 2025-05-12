@@ -43,7 +43,17 @@ st.markdown('<div class="title">AGENDA LABORATORIO DE INVESTIGACION Y ANALISIS D
 # --- 1. Ver horas disponibles ---
 st.header("🕒 Ver horas disponibles")
 fecha_seleccionada = st.date_input("Selecciona una fecha", dt.date.today())
-bloques_horarios = [dt.time(h, m) for h in range(9, 18) for m in (0, 30)]
+
+# Bloques fijos definidos
+bloques_fijos = {
+    "08:30 - 09:30": dt.time(8, 30),
+    "09:40 - 10:40": dt.time(9, 40),
+    "10:50 - 11:50": dt.time(10, 50),
+    "12:00 - 13:00": dt.time(12, 00),
+    "14:30 - 15:30": dt.time(14, 30),
+    "15:40 - 16:40": dt.time(15, 40),
+    "16:50 - 17:50": dt.time(16, 50)
+}
 
 def obtener_eventos_del_dia(fecha):
     eventos = calendar_manager.list_upcoming_events(50)
@@ -58,10 +68,10 @@ def obtener_eventos_del_dia(fecha):
 
 ocupados = obtener_eventos_del_dia(fecha_seleccionada)
 
-for hora in bloques_horarios:
+for bloque, hora in bloques_fijos.items():
     estado = "⛔ Ocupado" if hora in ocupados else "✅ Disponible"
     clase = "occupied" if hora in ocupados else "available"
-    st.markdown(f'<div class="{clase}">{hora.strftime("%H:%M")} - {estado}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="{clase}">{bloque} - {estado}</div>', unsafe_allow_html=True)
 
 # --- 3. Crear evento ---
 st.header("📌 Reserva una hora")
@@ -71,8 +81,17 @@ nombre_responsable = st.text_input("Ingrese nombre de profesor/a o persona respo
 correo_responsable = st.text_input("Ingrese Correo electrónico de profesor/a o persona responsable")
 motivo = st.text_input("Motivo de uso del laboratorio")
 fecha = st.date_input("Fecha de reserva", dt.date.today())
-hora = st.time_input("Hora de inicio", dt.time(9, 0))
-duracion = st.slider("Duración (en minutos)", 30, 180, 60, step=30)
+bloques_disponibles = {
+    "08:30 - 09:30": (dt.time(8, 30), 60),
+    "09:40 - 10:40": (dt.time(9, 40), 60),
+    "10:50 - 11:50": (dt.time(10, 50), 60),
+    "12:00 - 13:00": (dt.time(12, 00), 60),
+    "14:30 - 15:30": (dt.time(14, 30), 60),
+    "15:40 - 16:40": (dt.time(15, 40), 60),
+    "16:50 - 17:50": (dt.time(16, 50), 60)
+}
+bloque_seleccionado = st.selectbox("Selecciona un bloque horario", list(bloques_disponibles.keys()))
+hora, duracion = bloques_disponibles[bloque_seleccionado]
 
 # Verificación robusta de tipos
 if isinstance(fecha, str):
@@ -110,7 +129,7 @@ else:
             end_time=fin
         )
 
-        if link.startswith("http"):
+        if link and link.startswith("http"):
             # ✅ Registro en Google Sheets
             calendar_manager.append_to_sheet([
                 dt.datetime.now().isoformat(),
