@@ -79,7 +79,7 @@ class GoogleCalendarManager:
             body = {"values": [row_data]}
             result = self.sheets_service.spreadsheets().values().append(
                 spreadsheetId=SPREADSHEET_ID,
-                range=f"{SHEET_NAME}!A1",
+                range=f"{SHEET_NAME}",
                 valueInputOption="USER_ENTERED",
                 insertDataOption="INSERT_ROWS",
                 body=body
