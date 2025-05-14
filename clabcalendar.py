@@ -33,7 +33,7 @@ class GoogleCalendarManager:
     def list_upcoming_events(self, max_results=10):
         chile_tz = pytz.timezone(TIMEZONE)
         now = dt.datetime.now(chile_tz).isoformat()
-        end = (dt.datetime.now(chile_tz) + dt.timedelta(days=5)).replace(
+        end = (dt.datetime.now(chile_tz) + dt.timedelta(days=6)).replace(
             hour=23, minute=59, second=0, microsecond=0
         ).isoformat()
         try:

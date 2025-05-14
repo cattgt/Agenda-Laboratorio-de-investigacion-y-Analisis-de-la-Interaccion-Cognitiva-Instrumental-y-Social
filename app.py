@@ -50,9 +50,10 @@ bloques_fijos = {
     "09:40 - 10:40": dt.time(9, 40),
     "10:50 - 11:50": dt.time(10, 50),
     "12:00 - 13:00": dt.time(12, 00),
-    "14:30 - 15:30": dt.time(14, 30),
-    "15:40 - 16:40": dt.time(15, 40),
-    "16:50 - 17:50": dt.time(16, 50)
+    "14:10 - 15:10": dt.time(14, 10),
+    "15:20 - 16:20": dt.time(15, 20),
+    "16:30 - 17:30": dt.time(16, 30),
+    "17:40 - 18:40": dt.time(17, 40)
 }
 
 def obtener_eventos_del_dia(fecha):
@@ -79,16 +80,39 @@ nombre = st.text_input("Tu nombre completo")
 correo = st.text_input("Ingrese Correo electrónico")
 nombre_responsable = st.text_input("Ingrese nombre de profesor/a o persona responsable")
 correo_responsable = st.text_input("Ingrese Correo electrónico de profesor/a o persona responsable")
-motivo = st.text_input("Motivo de uso del laboratorio")
+mediciones = st.multiselect(
+    "Selecciona qué mediciones deseas realizar:",
+    [
+        "Frecuencia cardiaca", "Conductancia de la piel", "Respiración",
+        "Pletismografía / Cambios en volumen sanguíneo", "Seguimiento ocular",
+        "Reconocimiento facial de emociones", "Grabación de interacción/conducta",
+        "Uso de computadores", "Otro"
+    ]
+)
+
+motivo = st.selectbox(
+    "Motivo de uso del laboratorio",
+    [
+        "Capacitación",
+        "Investigación",
+        "Testeo de equipos",
+        "Pre-testeo",
+        "Proyecto de tesis pregrado",
+        "Proyecto de tesis doctorado",
+        "Otro"
+    ]
+)
+
 fecha = st.date_input("Fecha de reserva", dt.date.today())
 bloques_disponibles = {
     "08:30 - 09:30": (dt.time(8, 30), 60),
     "09:40 - 10:40": (dt.time(9, 40), 60),
     "10:50 - 11:50": (dt.time(10, 50), 60),
     "12:00 - 13:00": (dt.time(12, 00), 60),
-    "14:30 - 15:30": (dt.time(14, 30), 60),
-    "15:40 - 16:40": (dt.time(15, 40), 60),
-    "16:50 - 17:50": (dt.time(16, 50), 60)
+    "14:10 - 15:10": (dt.time(14, 10), 60),
+    "15:20 - 16:20": (dt.time(15, 20), 60),
+    "16:30 - 17:30": (dt.time(16, 30), 60),
+    "17:40 - 18:40": (dt.time(17, 40), 60)
 }
 bloque_seleccionado = st.selectbox("Selecciona un bloque horario", list(bloques_disponibles.keys()))
 hora, duracion = bloques_disponibles[bloque_seleccionado]
