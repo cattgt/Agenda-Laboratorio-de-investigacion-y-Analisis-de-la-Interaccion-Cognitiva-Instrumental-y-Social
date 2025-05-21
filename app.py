@@ -3,7 +3,7 @@ import datetime as dt
 from clabcalendar import GoogleCalendarManager
 
 # Mostrar logotipo al inicio
-st.image("logo_11.png", width=150)  # Puedes ajustar el ancho según prefieras
+st.image("logo_11.png", width=130)  # Puedes ajustar el ancho según prefieras
 
 # Inicializa el manejador de calendario
 calendar_manager = GoogleCalendarManager()
@@ -95,11 +95,7 @@ motivo = st.selectbox(
     [
         "Capacitación",
         "Investigación",
-        "Testeo de equipos",
-        "Pre-testeo",
-        "Proyecto de tesis pregrado",
-        "Proyecto de tesis doctorado",
-        "Otro"
+        "Testeo de equipos"
     ]
 )
 
@@ -124,7 +120,7 @@ if isinstance(hora, str):
     hora = dt.datetime.strptime(hora, "%H:%M:%S").time()
 
 # --- Documentos éticos (opcional) ---
-st.header("📄 Documentos éticos (opcional)")
+st.header("📄 Si hace investigación inserte documentos éticos")
 st.caption("Sube el protocolo aprobado por el CEC si aplica.")
 archivo = st.file_uploader("Sube tu protocolo (PDF, Word, etc.)", type=["pdf", "docx", "doc"])
 archivo_nombre = archivo.name if archivo else "No se subió archivo"
