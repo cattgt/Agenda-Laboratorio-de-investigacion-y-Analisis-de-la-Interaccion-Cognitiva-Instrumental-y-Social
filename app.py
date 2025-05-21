@@ -3,7 +3,7 @@ import datetime as dt
 from clabcalendar import GoogleCalendarManager
 
 # Mostrar logotipo al inicio
-st.image("logo_11.png", width=125)  # Puedes ajustar el ancho según prefieras
+st.image("logo_11.png", width=120)
 
 # Inicializa el manejador de calendario
 calendar_manager = GoogleCalendarManager()
@@ -37,7 +37,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 st.markdown('<div class="title">AGENDA LABORATORIO DE INVESTIGACION Y ANALISIS DE LA INTERACCION COGNITIVA, INSTRUMENTAL Y SOCIAL</div>', unsafe_allow_html=True)
 
 # --- 1. Ver horas disponibles ---
@@ -67,11 +66,20 @@ def obtener_eventos_del_dia(fecha):
                 ocupados.append(start_dt.time())
     return ocupados
 
-ocupados = obtener_eventos_del_dia(fecha_seleccionada)
+def hora_ocupada(hora_bloque, lista_ocupados):
+    for ocupado in lista_ocupados:
+        if hora_bloque.hour == ocupado.hour and hora_bloque.minute == ocupado.minute:
+            return True
+    return False
 
+ocupados = obtener_eventos_del_dia(fecha_seleccionada)
 for bloque, hora in bloques_fijos.items():
-    estado = "⛔ Ocupado" if hora in ocupados else "✅ Disponible"
-    clase = "occupied" if hora in ocupados else "available"
+    if hora_ocupada(hora, ocupados):
+        estado = "⛔ Ocupado"
+        clase = "occupied"
+    else:
+        estado = "✅ Disponible"
+        clase = "available"
     st.markdown(f'<div class="{clase}">{bloque} - {estado}</div>', unsafe_allow_html=True)
 
 # --- 3. Crear evento ---
@@ -80,6 +88,7 @@ nombre = st.text_input("Tu nombre completo")
 correo = st.text_input("Ingrese Correo electrónico")
 nombre_responsable = st.text_input("Ingrese nombre de profesor/a o persona responsable")
 correo_responsable = st.text_input("Ingrese Correo electrónico de profesor/a o persona responsable")
+
 mediciones = st.multiselect(
     "Selecciona qué mediciones deseas realizar:",
     [
@@ -110,14 +119,7 @@ bloques_disponibles = {
     "16:30 - 17:30": (dt.time(16, 30), 60),
     "17:40 - 18:40": (dt.time(17, 40), 60)
 }
-bloque_seleccionado = st.selectbox("Selecciona un bloque horario", list(bloques_disponibles.keys()))
-hora, duracion = bloques_disponibles[bloque_seleccionado]
-
-# Verificación robusta de tipos
-if isinstance(fecha, str):
-    fecha = dt.datetime.strptime(fecha, "%Y-%m-%d").date()
-if isinstance(hora, str):
-    hora = dt.datetime.strptime(hora, "%H:%M:%S").time()
+bloques_seleccionados = st.multiselect("Selecciona uno o más bloques horarios", list(bloques_disponibles.keys()))
 
 # --- Documentos éticos (opcional) ---
 st.header("📄 Documentación requerida si hace investigación")
@@ -133,39 +135,50 @@ if not nombre or not correo:
     st.warning("Por favor, ingresa tu nombre y correo antes de agendar.")
 else:
     if st.button("Agendar hora"):
-        inicio = dt.datetime.combine(fecha, hora).isoformat()
-        fin = (dt.datetime.combine(fecha, hora) + dt.timedelta(minutes=duracion)).isoformat()
-        resumen = f"{nombre} - {motivo}"
-        descripcion = (
-            f"Correo: {correo}\n"
-            f"Responsable: {nombre_responsable} ({correo_responsable})\n"
-            f"Motivo: {motivo}"
-        )
+        errores = []
+        for bloque in bloques_seleccionados:
+            hora, duracion = bloques_disponibles[bloque]
+            if hora_ocupada(hora, ocupados):
+                errores.append(f"❌ El bloque '{bloque}' ya está ocupado.")
+                continue
 
-        link = calendar_manager.create_event(
-            summary=resumen,
-            description=descripcion,
-            start_time=inicio,
-            end_time=fin
-        )
+            inicio = dt.datetime.combine(fecha, hora).isoformat()
+            fin = (dt.datetime.combine(fecha, hora) + dt.timedelta(minutes=duracion)).isoformat()
+            resumen = f"{nombre} - {motivo}"
+            descripcion = (
+                f"Correo: {correo}\n"
+                f"Responsable: {nombre_responsable} ({correo_responsable})\n"
+                f"Motivo: {motivo}"
+            )
 
-        if link and link.startswith("http"):
-            # ✅ Registro en Google Sheets
-            calendar_manager.append_to_sheet([
-                dt.datetime.now().isoformat(),
-                nombre,
-                correo,
-                nombre_responsable,
-                correo_responsable,
-                motivo,
-                fecha.strftime("%Y-%m-%d"),
-                hora.strftime("%H:%M"),
-                f"{duracion} minutos",
-                archivo_nombre,
-                link
-            ])
+            link = calendar_manager.create_event(
+                summary=resumen,
+                description=descripcion,
+                start_time=inicio,
+                end_time=fin
+            )
 
-            st.success("✅ Reserva realizada correctamente!")
-            st.balloons()
+            if link and link.startswith("http"):
+                calendar_manager.append_to_sheet([
+                    dt.datetime.now().isoformat(),
+                    nombre,
+                    correo,
+                    nombre_responsable,
+                    correo_responsable,
+                    motivo,
+                    fecha.strftime("%Y-%m-%d"),
+                    hora.strftime("%H:%M"),
+                    f"{duracion} minutos",
+                    archivo_nombre,
+                    link
+                ])
+            else:
+                errores.append(f"❌ Error al agendar el bloque '{bloque}'.")
+
+        if errores:
+            for err in errores:
+                st.error(err)
         else:
-            st.error(link)
+            st.success("✅ ¡Todos los bloques fueron reservados correctamente!")
+            st.balloons()
+        
