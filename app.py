@@ -165,6 +165,7 @@ else:
                     correo,
                     nombre_responsable,
                     correo_responsable,
+                    mediciones,
                     motivo,
                     fecha.strftime("%Y-%m-%d"),
                     hora.strftime("%H:%M"),
