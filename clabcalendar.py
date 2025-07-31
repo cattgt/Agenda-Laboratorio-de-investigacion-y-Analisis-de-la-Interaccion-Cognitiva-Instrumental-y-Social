@@ -72,7 +72,7 @@ class GoogleCalendarManager:
     def append_to_sheet(self, row_data):
         """
         row_data: lista con los siguientes campos:
-        [fecha_inscripcion, nombre, correo, nombre_responsable, correo_responsable,
+        [fecha_inscripcion, nombre, correo, nombre_responsable, correo_responsable, mediciones,
          motivo, fecha_reserva, hora, duracion, archivo_nombre, link]
         """
         try:
