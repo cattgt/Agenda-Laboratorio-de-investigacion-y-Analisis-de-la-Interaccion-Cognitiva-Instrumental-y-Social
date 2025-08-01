@@ -1,6 +1,7 @@
 import streamlit as st
 import datetime as dt
 from clabcalendar import GoogleCalendarManager
+from dateutil import parser 
 
 # Mostrar logotipo al inicio
 st.image("logo_11.png", width=120)
@@ -61,7 +62,7 @@ def obtener_eventos_del_dia(fecha):
     for evento in eventos:
         inicio = evento["start"].get("dateTime")
         if inicio:
-            start_dt = dt.datetime.fromisoformat(inicio)
+            start_dt = parser.isoparse(inicio).astimezone()  # ← CAMBIO AQUÍ
             if start_dt.date() == fecha:
                 ocupados.append(start_dt.time())
     return ocupados
