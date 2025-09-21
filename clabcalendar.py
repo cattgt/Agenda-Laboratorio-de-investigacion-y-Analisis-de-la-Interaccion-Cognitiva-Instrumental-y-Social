@@ -14,11 +14,11 @@ SCOPES = [
 ]
 
 # ✅ ID del calendario compartido del laboratorio
-CALENDAR_ID = '1e2385c410653a58928207f870002e8a4a03683d51de7b0c3ae768fd98e88e73@group.calendar.google.com'
+CALENDAR_ID = '088ad85ef8fdcb937ac7b19749449e0b20f331220495d55f5952394af31f1f30@group.calendar.google.com'
 TIMEZONE = 'America/Santiago'
 
 # ✅ ID de la hoja de cálculo y nombre de la hoja
-SPREADSHEET_ID = '1uZ2-EKjvWFKTo8V7VtQEN26Vgce6kccXy3yzX2le06w'
+SPREADSHEET_ID = '15l1xB9SyZPFPsQPA9b_xLBAaZLvvcNWXc0K12QEtlo8'
 SHEET_NAME = 'C-LAB RESERVA'
 
 class GoogleCalendarManager:
