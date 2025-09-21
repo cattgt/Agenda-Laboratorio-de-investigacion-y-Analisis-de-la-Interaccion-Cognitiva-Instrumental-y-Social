@@ -128,8 +128,14 @@ st.caption("Inserte protocolo/ documentos éticos aprobados por el CEC")
 archivo = st.file_uploader("Sube tu protocolo (PDF, Word, etc.)", type=["pdf", "docx", "doc"])
 archivo_nombre = archivo.name if archivo else "No se subió archivo"
 
+# --- Subir archivo a Drive si se cargó ---
+archivo_link_drive = None
 if archivo:
-    st.success(f"Archivo '{archivo.name}' cargado correctamente.")
+    archivo_link_drive = calendar_manager.upload_file_to_drive(archivo, archivo.name)
+    if archivo_link_drive:
+        st.success(f"Archivo '{archivo.name}' cargado correctamente. Link en Drive: {archivo_link_drive}")
+    else:
+        st.error(f"❌ No se pudo subir el archivo '{archivo.name}' a Drive.")
 
 # --- Validación antes de agendar ---
 if not nombre or not correo:
@@ -171,7 +177,7 @@ else:
                     fecha.strftime("%Y-%m-%d"),
                     hora.strftime("%H:%M"),
                     f"{duracion} minutos",
-                    archivo_nombre,
+                    archivo_link_drive if archivo_link_drive else "No se subió archivo",
                     link
                 ])
             else:
