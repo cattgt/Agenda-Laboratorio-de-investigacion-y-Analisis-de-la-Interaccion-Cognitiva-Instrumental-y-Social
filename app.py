@@ -1,7 +1,9 @@
+
 import streamlit as st
 import datetime as dt
-from clabcalendar import GoogleCalendarManager
-from dateutil import parser 
+from clabcalendar import GoogleCalendarManager, CALENDAR_ID
+from dateutil import parser
+import pytz  # NECESARIO PARA ZONA HORARIA
 
 # Mostrar logotipo al inicio
 st.image("logo_11.png", width=120)
@@ -38,7 +40,11 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-st.markdown('<div class="title">AGENDA LABORATORIO DE INVESTIGACION Y ANALISIS DE LA INTERACCION COGNITIVA, INSTRUMENTAL Y SOCIAL</div>', unsafe_allow_html=True)
+
+st.markdown(
+    '<div class="title">AGENDA LABORATORIO DE INVESTIGACION Y ANALISIS DE LA INTERACCION COGNITIVA, INSTRUMENTAL Y SOCIAL</div>',
+    unsafe_allow_html=True
+)
 
 # --- 1. Ver horas disponibles ---
 st.header("🕒 Ver horas disponibles")
@@ -56,13 +62,15 @@ bloques_fijos = {
     "17:40 - 18:40": dt.time(17, 40)
 }
 
+# --- FUNCIÓN CORREGIDA PARA VER EVENTOS DEL DÍA ---
 def obtener_eventos_del_dia(fecha):
-    # Convertir fecha en rango completo del día
-    inicio_dia = dt.datetime.combine(fecha, dt.time.min).isoformat() + "Z"
-    fin_dia = dt.datetime.combine(fecha, dt.time.max).isoformat() + "Z"
+    chile_tz = pytz.timezone("America/Santiago")
+
+    inicio_dia = chile_tz.localize(dt.datetime.combine(fecha, dt.time.min)).isoformat()
+    fin_dia = chile_tz.localize(dt.datetime.combine(fecha, dt.time.max)).isoformat()
 
     eventos = calendar_manager.calendar_service.events().list(
-         calendarId=calendar_manager.calendar_id,  # IMPORTANTE: calendario compartido
+        calendarId=CALENDAR_ID,   # ✔ USAR LA CONSTANTE REAL
         timeMin=inicio_dia,
         timeMax=fin_dia,
         singleEvents=True,
@@ -73,10 +81,12 @@ def obtener_eventos_del_dia(fecha):
     for evento in eventos:
         inicio = evento["start"].get("dateTime")
         if inicio:
-            start_dt = parser.isoparse(inicio).astimezone()
-            ocupados.append(start_dt.time())
+            start_dt = parser.isoparse(inicio).astimezone(chile_tz)
+            if start_dt.date() == fecha:
+                ocupados.append(start_dt.time())
     return ocupados
 
+# --- Comparar horas ocupadas ---
 def hora_ocupada(hora_bloque, lista_ocupados):
     for ocupado in lista_ocupados:
         if hora_bloque.hour == ocupado.hour and hora_bloque.minute == ocupado.minute:
@@ -132,13 +142,12 @@ bloques_disponibles = {
 }
 bloques_seleccionados = st.multiselect("Selecciona uno o más bloques horarios", list(bloques_disponibles.keys()))
 
-# --- Documentos éticos (opcional) ---
+# --- Documentos éticos ---
 st.header("📄 Documentación requerida si hace investigación")
 st.caption("Inserte protocolo/ documentos éticos aprobados por el CEC")
 archivo = st.file_uploader("Sube tu protocolo (PDF, Word, etc.)", type=["pdf", "docx", "doc"])
 archivo_nombre = archivo.name if archivo else "No se subió archivo"
 
-# --- Subir archivo a Drive si se cargó ---
 archivo_link_drive = None
 if archivo:
     archivo_link_drive = calendar_manager.upload_file_to_drive(archivo, archivo.name)
@@ -147,7 +156,7 @@ if archivo:
     else:
         st.error(f"❌ No se pudo subir el archivo '{archivo.name}' a Drive.")
 
-# --- Validación antes de agendar ---
+# --- Validación ---
 if not nombre or not correo:
     st.warning("Por favor, ingresa tu nombre y correo antes de agendar.")
 else:
@@ -182,7 +191,7 @@ else:
                     correo,
                     nombre_responsable,
                     correo_responsable,
-                    ", ".join(mediciones), 
+                    ", ".join(mediciones),
                     motivo,
                     fecha.strftime("%Y-%m-%d"),
                     hora.strftime("%H:%M"),
@@ -199,4 +208,5 @@ else:
         else:
             st.success("✅ ¡Todos los bloques fueron reservados correctamente!")
             st.balloons()
+
         
