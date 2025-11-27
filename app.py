@@ -57,14 +57,24 @@ bloques_fijos = {
 }
 
 def obtener_eventos_del_dia(fecha):
-    eventos = calendar_manager.list_upcoming_events(50)
+    # Convertir fecha en rango completo del día
+    inicio_dia = dt.datetime.combine(fecha, dt.time.min).isoformat() + "Z"
+    fin_dia = dt.datetime.combine(fecha, dt.time.max).isoformat() + "Z"
+
+    eventos = calendar_manager.service.events().list(
+        calendarId="primary",
+        timeMin=inicio_dia,
+        timeMax=fin_dia,
+        singleEvents=True,
+        orderBy="startTime"
+    ).execute().get("items", [])
+
     ocupados = []
     for evento in eventos:
         inicio = evento["start"].get("dateTime")
         if inicio:
-            start_dt = parser.isoparse(inicio).astimezone()  # ← CAMBIO AQUÍ
-            if start_dt.date() == fecha:
-                ocupados.append(start_dt.time())
+            start_dt = parser.isoparse(inicio).astimezone()
+            ocupados.append(start_dt.time())
     return ocupados
 
 def hora_ocupada(hora_bloque, lista_ocupados):
