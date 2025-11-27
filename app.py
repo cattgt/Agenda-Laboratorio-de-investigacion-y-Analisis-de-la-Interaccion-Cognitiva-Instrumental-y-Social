@@ -61,8 +61,8 @@ def obtener_eventos_del_dia(fecha):
     inicio_dia = dt.datetime.combine(fecha, dt.time.min).isoformat() + "Z"
     fin_dia = dt.datetime.combine(fecha, dt.time.max).isoformat() + "Z"
 
-    eventos = calendar_manager.service.events().list(
-        calendarId="primary",
+    eventos = calendar_manager.calendar_service.events().list(
+        calendarId=CALENDAR_ID,  # IMPORTANTE: calendario compartido
         timeMin=inicio_dia,
         timeMax=fin_dia,
         singleEvents=True,
