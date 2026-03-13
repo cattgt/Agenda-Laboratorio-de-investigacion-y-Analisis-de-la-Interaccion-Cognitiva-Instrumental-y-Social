@@ -25,7 +25,7 @@ SHEET_NAME = 'C-LAB RESERVA'
 
 # ID de la carpeta de archivos 
 DRIVE_FOLDER_ID = '1j0bgnibm9RW4-bsceulsZxw_sCXNiGTA'
-DRIVE_NAME = 'C-LAB RESERVA'
+DRIVE_NAME = 'C-LAB-RESERVA'
 
 
 class GoogleCalendarManager:
@@ -108,7 +108,8 @@ class GoogleCalendarManager:
                 'name': filename,
                 'parents': [folder_id]
             }
-            media = MediaIoBaseUpload(io.BytesIO(file.getvalue()), mimetype=file.type)
+            file_content = file.getvalue()
+            media = MediaIoBaseUpload(io.BytesIO(file_content), mimetype=file.type, resumable=True)
             uploaded_file = self.drive_service.files().create(
                 body=file_metadata,
                 media_body=media,
