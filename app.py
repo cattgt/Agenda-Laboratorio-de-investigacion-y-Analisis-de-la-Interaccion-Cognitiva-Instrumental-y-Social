@@ -143,18 +143,18 @@ bloques_disponibles = {
 bloques_seleccionados = st.multiselect("Selecciona uno o más bloques horarios", list(bloques_disponibles.keys()))
 
 # --- Documentos éticos ---
-st.header("📄 Documentación requerida si hace investigación")
-st.caption("Inserte protocolo/ documentos éticos aprobados por el CEC")
-archivo = st.file_uploader("Sube tu protocolo (PDF, Word, etc.)", type=["pdf", "docx", "doc"])
-archivo_nombre = archivo.name if archivo else "No se subió archivo"
+#st.header("📄 Documentación requerida si hace investigación")
+#st.caption("Inserte protocolo/ documentos éticos aprobados por el CEC")
+#archivo = st.file_uploader("Sube tu protocolo (PDF, Word, etc.)", type=["pdf", "docx", "doc"])
+#archivo_nombre = archivo.name if archivo else "No se subió archivo"
 
-archivo_link_drive = None
-if archivo:
-    archivo_link_drive = calendar_manager.upload_file_to_drive(archivo, archivo.name)
-    if archivo_link_drive:
-        st.success(f"Archivo '{archivo.name}' cargado correctamente. Link en Drive: {archivo_link_drive}")
-    else:
-        st.error(f"❌ No se pudo subir el archivo '{archivo.name}' a Drive.")
+#archivo_link_drive = None
+#if archivo:
+   # archivo_link_drive = calendar_manager.upload_file_to_drive(archivo, archivo.name)
+    #if archivo_link_drive:
+        #st.success(f"Archivo '{archivo.name}' cargado correctamente. Link en Drive: {archivo_link_drive}")
+    #else:
+        #st.error(f"❌ No se pudo subir el archivo '{archivo.name}' a Drive.")
 
 # --- Validación ---
 if not nombre or not correo:
