@@ -196,7 +196,6 @@ else:
                     fecha.strftime("%Y-%m-%d"),
                     hora.strftime("%H:%M"),
                     f"{duracion} minutos",
-                    archivo_link_drive if archivo_link_drive else "No se subió archivo",
                     link
                 ])
             else:
