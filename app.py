@@ -52,14 +52,18 @@ fecha_seleccionada = st.date_input("Selecciona una fecha", dt.date.today())
 
 # Bloques fijos definidos
 bloques_fijos = {
-    "08:30 - 09:30": dt.time(8, 30),
-    "09:40 - 10:40": dt.time(9, 40),
-    "10:50 - 11:50": dt.time(10, 50),
-    "12:00 - 13:00": dt.time(12, 00),
-    "14:10 - 15:10": dt.time(14, 10),
-    "15:20 - 16:20": dt.time(15, 20),
-    "16:30 - 17:30": dt.time(16, 30),
-    "17:40 - 18:40": dt.time(17, 40)
+    "08:00 - 08:59": dt.time(8, 00),
+    "09:00 - 09:59": dt.time(9, 00),
+    "10:00 - 10:59": dt.time(10, 00),
+    "11:00 - 11:59": dt.time(11, 00),
+    "12:00 - 12:59": dt.time(12, 00),
+    "13:00 - 13:59": dt.time(13, 00),
+    "14:00 - 14:59": dt.time(14, 00),
+    "15:00 - 15:59": dt.time(15, 00),
+    "16:00 - 16:59": dt.time(16, 00),
+    "17:00 - 17:59": dt.time(17, 00),
+    "18:00 - 18:59": dt.time(18, 00),
+    "19:00 - 19:59": dt.time(19, 00)
 }
 
 # --- FUNCIÓN CORREGIDA PARA VER EVENTOS DEL DÍA ---
@@ -131,14 +135,18 @@ motivo = st.selectbox(
 
 fecha = st.date_input("Fecha de reserva", dt.date.today())
 bloques_disponibles = {
-    "08:30 - 09:30": (dt.time(8, 30), 60),
-    "09:40 - 10:40": (dt.time(9, 40), 60),
-    "10:50 - 11:50": (dt.time(10, 50), 60),
-    "12:00 - 13:00": (dt.time(12, 00), 60),
-    "14:10 - 15:10": (dt.time(14, 10), 60),
-    "15:20 - 16:20": (dt.time(15, 20), 60),
-    "16:30 - 17:30": (dt.time(16, 30), 60),
-    "17:40 - 18:40": (dt.time(17, 40), 60)
+    "08:00 - 08:59": (dt.time(8, 00), 60),
+    "09:00 - 09:59": (dt.time(9, 00), 60),
+    "10:00 - 10:59": (dt.time(10, 00), 60),
+    "11:00 - 11:59": (dt.time(11, 00), 60),
+    "12:00 - 12:59": (dt.time(12, 00), 60),
+    "13:00 - 13:59": (dt.time(13, 00), 60),
+    "14:00 - 14:59": (dt.time(14, 00), 60),
+    "15:00 - 15:59": (dt.time(15, 00), 60),
+    "16:00 - 16:59": (dt.time(16, 00), 60),
+    "17:00 - 17:59": (dt.time(17, 00), 60),
+    "18:00 - 18:59": (dt.time(18, 00), 60),
+    "19:00 - 19:59": (dt.time(19, 00), 60)
 }
 bloques_seleccionados = st.multiselect("Selecciona uno o más bloques horarios", list(bloques_disponibles.keys()))
 
