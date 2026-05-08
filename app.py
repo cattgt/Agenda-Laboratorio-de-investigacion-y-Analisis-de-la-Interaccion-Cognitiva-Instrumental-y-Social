@@ -129,7 +129,8 @@ motivo = st.selectbox(
     [
         "Capacitación",
         "Investigación",
-        "Testeo de equipos"
+        "Pilotaje de experimentos",
+        "Revisión del equipamiento"
     ]
 )
 
