@@ -1,4 +1,3 @@
-
 import streamlit as st
 import datetime as dt
 from clabcalendar import GoogleCalendarManager, CALENDAR_ID
@@ -217,4 +216,3 @@ else:
             st.success("✅ ¡Todos los bloques fueron reservados correctamente!")
             st.balloons()
 
-        
