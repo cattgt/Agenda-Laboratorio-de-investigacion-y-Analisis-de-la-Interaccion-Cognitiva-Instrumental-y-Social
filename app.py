@@ -215,4 +215,3 @@ else:
         else:
             st.success("✅ ¡Todos los bloques fueron reservados correctamente!")
             st.balloons()
-
