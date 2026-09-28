@@ -46,26 +46,22 @@ st.markdown(
 )
 
 # --- 1. Ver horas disponibles ---
-st.header("🕒 Ver horas disponibles")
-fecha_seleccionada = st.date_input("Selecciona una fecha", dt.date.today())
 
-# Bloques fijos definidos
 bloques_fijos = {
-    "08:00 - 08:59": dt.time(8, 00),
-    "09:00 - 09:59": dt.time(9, 00),
-    "10:00 - 10:59": dt.time(10, 00),
-    "11:00 - 11:59": dt.time(11, 00),
-    "12:00 - 12:59": dt.time(12, 00),
-    "13:00 - 13:59": dt.time(13, 00),
-    "14:00 - 14:59": dt.time(14, 00),
-    "15:00 - 15:59": dt.time(15, 00),
-    "16:00 - 16:59": dt.time(16, 00),
-    "17:00 - 17:59": dt.time(17, 00),
-    "18:00 - 18:59": dt.time(18, 00),
-    "19:00 - 19:59": dt.time(19, 00)
+    "08:00 - 08:59": dt.time(8, 0),
+    "09:00 - 09:59": dt.time(9, 0),
+    "10:00 - 10:59": dt.time(10, 0),
+    "11:00 - 11:59": dt.time(11, 0),
+    "12:00 - 12:59": dt.time(12, 0),
+    "13:00 - 13:59": dt.time(13, 0),
+    "14:00 - 14:59": dt.time(14, 0),
+    "15:00 - 15:59": dt.time(15, 0),
+    "16:00 - 16:59": dt.time(16, 0),
+    "17:00 - 17:59": dt.time(17, 0),
+    "18:00 - 18:59": dt.time(18, 0),
+    "19:00 - 19:59": dt.time(19, 0)
 }
-
-# --- FUNCIÓN CORREGIDA PARA VER EVENTOS DEL DÍA ---
+# --- FUNCIÓN PARA VER EVENTOS DEL DÍA ---
 def obtener_eventos_del_dia(fecha):
     chile_tz = pytz.timezone("America/Santiago")
 
@@ -86,40 +82,65 @@ def obtener_eventos_del_dia(fecha):
         if inicio:
             start_dt = parser.isoparse(inicio).astimezone(chile_tz)
             if start_dt.date() == fecha:
-                ocupados.append(start_dt.time())
+                descripcion = evento.get("description", "")
+                sector = None
+                if "Sector: Sala de control/ Sector 3" in descripcion:
+                    sector = "Sala de control/ Sector 3"
+
+                elif "Sector: Sala de observación/ Sector 4" in descripcion:
+                    sector = "Sala de observación/ Sector 4" 
+
+                elif "Sector: Ambos sectores" in descripcion:
+                    sector = "Ambos sectores"
+                if sector:
+                    ocupados.append({
+                        "hora": start_dt.time(),
+                        "sector": sector
+                    })
     return ocupados
 
-# --- Comparar horas ocupadas ---
-def hora_ocupada(hora_bloque, lista_ocupados):
+# --- Salas ocupadas ---
+
+def hora_ocupada(hora_bloque, sector, lista_ocupados):
     for ocupado in lista_ocupados:
-        if hora_bloque.hour == ocupado.hour and hora_bloque.minute == ocupado.minute:
-            return True
+
+        if ocupado["hora"].hour == hora_bloque.hour:
+            if ocupado["hora"].minute == hora_bloque.minute:
+
+                if ocupado["sector"] == sector:
+                    return True
+
+                if ocupado["sector"] == "Ambos sectores":
+                    return True
+
     return False
 
-ocupados = obtener_eventos_del_dia(fecha_seleccionada)
-for bloque, hora in bloques_fijos.items():
-    if hora_ocupada(hora, ocupados):
-        estado = "⛔ Ocupado"
-        clase = "occupied"
-    else:
-        estado = "✅ Disponible"
-        clase = "available"
-    st.markdown(f'<div class="{clase}">{bloque} - {estado}</div>', unsafe_allow_html=True)
-
 # --- 3. Crear evento ---
-st.header("📌 Reserva una hora")
+st.header("📌 Reserva una sala del laboratorio")
 nombre = st.text_input("Tu nombre completo")
 correo = st.text_input("Ingrese Correo electrónico")
 nombre_responsable = st.text_input("Ingrese nombre de profesor/a o persona responsable")
 correo_responsable = st.text_input("Ingrese Correo electrónico de profesor/a o persona responsable")
 
+# ---4. Reservar según sala diferenciada ---
+
+Sector = st.selectbox(
+    "¿Que sectores del laboratorio deseas recervar?",
+    [
+        "Sala de control/ Sector 3",
+        "Sala de observación/ Sector 4",
+        "Ambos sectores"
+    ]
+)
+
 mediciones = st.multiselect(
     "Selecciona qué mediciones deseas realizar:",
     [
         "Frecuencia cardiaca", "Conductancia de la piel", "Respiración",
-        "Pletismografía / Cambios en volumen sanguíneo", "Seguimiento ocular",
+        "Pletismografía / Cambios en volumen sanguíneo", "Seguimiento ocular de pantalla", 
+        "Seguimiento ocular dispositivo portatil",
         "Reconocimiento facial de emociones", "Grabación de interacción/conducta",
-        "Uso de computadores", "Otro"
+        "Uso de computadores"
     ]
 )
 
@@ -129,89 +150,149 @@ motivo = st.selectbox(
         "Capacitación",
         "Investigación",
         "Pilotaje de experimentos",
-        "Revisión del equipamiento"
+        "Soporte Técnico"
     ]
 )
 
 fecha = st.date_input("Fecha de reserva", dt.date.today())
-bloques_disponibles = {
-    "08:00 - 08:59": (dt.time(8, 00), 60),
-    "09:00 - 09:59": (dt.time(9, 00), 60),
-    "10:00 - 10:59": (dt.time(10, 00), 60),
-    "11:00 - 11:59": (dt.time(11, 00), 60),
-    "12:00 - 12:59": (dt.time(12, 00), 60),
-    "13:00 - 13:59": (dt.time(13, 00), 60),
-    "14:00 - 14:59": (dt.time(14, 00), 60),
-    "15:00 - 15:59": (dt.time(15, 00), 60),
-    "16:00 - 16:59": (dt.time(16, 00), 60),
-    "17:00 - 17:59": (dt.time(17, 00), 60),
-    "18:00 - 18:59": (dt.time(18, 00), 60),
-    "19:00 - 19:59": (dt.time(19, 00), 60)
-}
-bloques_seleccionados = st.multiselect("Selecciona uno o más bloques horarios", list(bloques_disponibles.keys()))
 
-# --- Documentos éticos ---
-#st.header("📄 Documentación requerida si hace investigación")
-#st.caption("Inserte protocolo/ documentos éticos aprobados por el CEC")
-#archivo = st.file_uploader("Sube tu protocolo (PDF, Word, etc.)", type=["pdf", "docx", "doc"])
-#archivo_nombre = archivo.name if archivo else "No se subió archivo"
+#bloques_disponibles = {
+    #"08:00 - 08:59": (dt.time(8, 00), 60),
+    #"09:00 - 09:59": (dt.time(9, 00), 60),
+    ##"10:00 - 10:59": (dt.time(10, 00), 60),
+    #"11:00 - 11:59": (dt.time(11, 00), 60),
+    #"12:00 - 12:59": (dt.time(12, 00), 60),
+    #"13:00 - 13:59": (dt.time(13, 00), 60),
+    #"14:00 - 14:59": (dt.time(14, 00), 60),
+    #"15:00 - 15:59": (dt.time(15, 00), 60),
+    #"16:00 - 16:59": (dt.time(16, 00), 60),
+    #"17:00 - 17:59": (dt.time(17, 00), 60),
+    #"18:00 - 18:59": (dt.time(18, 00), 60),
+    #"19:00 - 19:59": (dt.time(19, 00), 60)
+#}
 
-#archivo_link_drive = None
-#if archivo:
-   # archivo_link_drive = calendar_manager.upload_file_to_drive(archivo, archivo.name)
-    #if archivo_link_drive:
-        #st.success(f"Archivo '{archivo.name}' cargado correctamente. Link en Drive: {archivo_link_drive}")
-    #else:
-        #st.error(f"❌ No se pudo subir el archivo '{archivo.name}' a Drive.")
+ocupados = obtener_eventos_del_dia(fecha)
+bloques_disponibles = []
+
+for bloque, hora in bloques_fijos.items():
+
+    if Sector == "Ambos sectores":
+
+        if (
+            not hora_ocupada(
+                hora,
+                "Sala de control/ Sector 3",
+                ocupados
+            )
+            and
+            not hora_ocupada(
+                hora,
+                "Sala de observación/ Sector 4",
+                ocupados
+            )
+        ):
+            bloques_disponibles.append(bloque)
+
+    else:
+
+        if not hora_ocupada(hora, Sector, ocupados):
+            bloques_disponibles.append(bloque)
+
+bloques_seleccionados = st.multiselect(
+    "Selecciona uno o más bloques disponibles",
+    bloques_disponibles
+)
 
 # --- Validación ---
 if not nombre or not correo:
     st.warning("Por favor, ingresa tu nombre y correo antes de agendar.")
 else:
     if st.button("Agendar hora"):
+        ocupados = obtener_eventos_del_dia(fecha)
         errores = []
+
         for bloque in bloques_seleccionados:
-            hora, duracion = bloques_disponibles[bloque]
-            if hora_ocupada(hora, ocupados):
-                errores.append(f"❌ El bloque '{bloque}' ya está ocupado.")
-                continue
 
-            inicio = dt.datetime.combine(fecha, hora).isoformat()
-            fin = (dt.datetime.combine(fecha, hora) + dt.timedelta(minutes=duracion)).isoformat()
-            resumen = f"{nombre} - {motivo}"
-            descripcion = (
-                f"Correo: {correo}\n"
-                f"Responsable: {nombre_responsable} ({correo_responsable})\n"
-                f"Motivo: {motivo}"
-            )
+            hora = bloques_fijos[bloque]
+            duracion = 60
 
-            link = calendar_manager.create_event(
-                summary=resumen,
-                description=descripcion,
-                start_time=inicio,
-                end_time=fin
-            )
+            # Volver a comprobar disponibilidad antes de reservar
+            if Sector == "Ambos sectores":
 
-            if link and link.startswith("http"):
-                calendar_manager.append_to_sheet([
-                    dt.datetime.now().isoformat(),
-                    nombre,
-                    correo,
-                    nombre_responsable,
-                    correo_responsable,
-                    ", ".join(mediciones),
-                    motivo,
-                    fecha.strftime("%Y-%m-%d"),
-                    hora.strftime("%H:%M"),
-                    f"{duracion} minutos",
-                    link
-                ])
+                sector_a_reservar = [
+                    "Sala de control/ Sector 3",
+                    "Sala de observación/ Sector 4"
+                ]
+
             else:
-                errores.append(f"❌ Error al agendar el bloque '{bloque}'.")
+
+                sector_a_reservar = [Sector]
+
+            # Crear un evento por cada sector que se va a reservar
+            for sector in sector_a_reservar:
+
+                if hora_ocupada(hora, sector, ocupados):
+                    errores.append(
+                        f"❌ El bloque '{bloque}' ya está ocupado en {sector}."
+                    )
+                    continue
+
+                inicio = dt.datetime.combine(
+                    fecha,
+                    hora
+                ).isoformat()
+
+                fin = (
+                    dt.datetime.combine(fecha, hora)
+                    + dt.timedelta(minutes=duracion)
+                ).isoformat()
+
+                resumen = f"{nombre} - {motivo}"
+
+                descripcion = (
+                    f"Correo: {correo}\n"
+                    f"Responsable: {nombre_responsable} "
+                    f"({correo_responsable})\n"
+                    f"Motivo: {motivo}\n"
+                    f"Sector: {sector}"
+                )
+
+                link = calendar_manager.create_event(
+                    summary=resumen,
+                    description=descripcion,
+                    start_time=inicio,
+                    end_time=fin
+                )
+
+                if link and link.startswith("http"):
+
+                    calendar_manager.append_to_sheet([
+                        dt.datetime.now().isoformat(),
+                        nombre,
+                        correo,
+                        nombre_responsable,
+                        correo_responsable,
+                        ", ".join(mediciones),
+                        motivo,
+                        sector,
+                        fecha.strftime("%Y-%m-%d"),
+                        hora.strftime("%H:%M"),
+                        f"{duracion} minutos",
+                        link
+                    ])
+
+                else:
+                    errores.append(
+                        f"❌ Error al agendar el bloque "
+                        f"'{bloque}' en {sector}."
+                    )
 
         if errores:
             for err in errores:
                 st.error(err)
         else:
-            st.success("✅ ¡Todos los bloques fueron reservados correctamente!")
+            st.success(
+                "✅ ¡Todos los bloques fueron reservados correctamente!"
+            )
             st.balloons()
+
