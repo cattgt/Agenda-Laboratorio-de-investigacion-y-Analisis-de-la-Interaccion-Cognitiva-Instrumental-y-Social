@@ -16,8 +16,9 @@ st.markdown(
     <style>
         .title {
             font-size: 36px;
-            color: #00BFFF;
+            color: #4BA6FF;
             text-align: center;
+            font-weight: bold;
         }
         .available {
             background-color: #98FB98;
@@ -41,7 +42,7 @@ st.markdown(
 )
 
 st.markdown(
-    '<div class="title">AGENDA LABORATORIO DE INVESTIGACION Y ANALISIS DE LA INTERACCION COGNITIVA, INSTRUMENTAL Y SOCIAL</div>',
+    '<div class="title">AGENDA LABORATORIO DE INVESTIGACION Y ANALISIS DE LA INTERACCION COGNITIVA, INSTRUMENTAL Y SOCIAL </div>',
     unsafe_allow_html=True
 )
 
@@ -121,7 +122,13 @@ nombre = st.text_input("Tu nombre completo")
 correo = st.text_input("Ingrese Correo electrónico")
 nombre_responsable = st.text_input("Ingrese nombre de profesor/a o persona responsable")
 correo_responsable = st.text_input("Ingrese Correo electrónico de profesor/a o persona responsable")
-
+st.markdown(
+    '<span style="color:#4BA6FF; font-size:14px;">'
+    'Documentos éticos<br>'
+    'El uso de consentimientos informados debe estar aprobado por el CEC o comité ético de la facultad y ser enviados a este correo: cicc.utalca@gmail.com'
+    '</span>',
+    unsafe_allow_html=True
+)
 # ---4. Reservar según sala diferenciada ---
 
 Sector = st.selectbox(
@@ -171,9 +178,7 @@ columnas = st.columns(2)
 
 for indice, (bloque, hora) in enumerate(bloques_fijos.items()):
 
-    # -------------------------------------------------
-    # DETERMINAR SI EL BLOQUE ESTÁ OCUPADO
-    # -------------------------------------------------
+    # DETERMINAR SI EL BLOQUE ESTÁ OCUPADO---------------------
 
     if Sector == "Ambos sectores":
 
@@ -202,11 +207,8 @@ for indice, (bloque, hora) in enumerate(bloques_fijos.items()):
 
 
     columna = columnas[indice % 2]
-
-
-    # -------------------------------------------------
-    # SI ESTÁ OCUPADO
-    # -------------------------------------------------
+    
+    # SI ESTÁ OCUPADO---------------------
 
     if ocupado:
 
@@ -216,10 +218,7 @@ for indice, (bloque, hora) in enumerate(bloques_fijos.items()):
             key=f"ocupado_{bloque}"
         )
 
-
-    # -------------------------------------------------
-    # SI ESTÁ DISPONIBLE
-    # -------------------------------------------------
+    # SI ESTÁ DISPONIBLE---------------------
 
     else:
 
