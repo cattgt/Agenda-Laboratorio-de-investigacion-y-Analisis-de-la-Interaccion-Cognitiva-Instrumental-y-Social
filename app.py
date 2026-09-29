@@ -159,7 +159,7 @@ fecha = st.date_input("Fecha de reserva", dt.date.today())
 #bloques_disponibles = {
     #"08:00 - 08:59": (dt.time(8, 00), 60),
     #"09:00 - 09:59": (dt.time(9, 00), 60),
-    ##"10:00 - 10:59": (dt.time(10, 00), 60),
+    #"10:00 - 10:59": (dt.time(10, 00), 60),
     #"11:00 - 11:59": (dt.time(11, 00), 60),
     #"12:00 - 12:59": (dt.time(12, 00), 60),
     #"13:00 - 13:59": (dt.time(13, 00), 60),
@@ -171,37 +171,98 @@ fecha = st.date_input("Fecha de reserva", dt.date.today())
     #"19:00 - 19:59": (dt.time(19, 00), 60)
 #}
 
+# Obtener las reservas de Google Calendar
 ocupados = obtener_eventos_del_dia(fecha)
-bloques_disponibles = []
 
-for bloque, hora in bloques_fijos.items():
+
+# Guardar los horarios que el usuario va seleccionando
+if "bloques_seleccionados" not in st.session_state:
+    st.session_state.bloques_seleccionados = []
+
+
+st.subheader("🕐 Selecciona tus horarios")
+
+columnas = st.columns(2)
+
+for indice, (bloque, hora) in enumerate(bloques_fijos.items()):
+
+    # -------------------------------------------------
+    # DETERMINAR SI EL BLOQUE ESTÁ OCUPADO
+    # -------------------------------------------------
 
     if Sector == "Ambos sectores":
 
-        if (
-            not hora_ocupada(
+        ocupado = (
+            hora_ocupada(
                 hora,
                 "Sala de control/ Sector 3",
                 ocupados
             )
-            and
-            not hora_ocupada(
+            or
+            hora_ocupada(
                 hora,
                 "Sala de observación/ Sector 4",
                 ocupados
             )
-        ):
-            bloques_disponibles.append(bloque)
+        )
 
     else:
 
-        if not hora_ocupada(hora, Sector, ocupados):
-            bloques_disponibles.append(bloque)
 
-bloques_seleccionados = st.multiselect(
-    "Selecciona uno o más bloques disponibles",
-    bloques_disponibles
-)
+        ocupado = hora_ocupada(
+            hora,
+            Sector,
+            ocupados
+        )
+
+
+    columna = columnas[indice % 2]
+
+
+    # -------------------------------------------------
+    # SI ESTÁ OCUPADO
+    # -------------------------------------------------
+
+    if ocupado:
+
+        columna.button(
+            f"🔴 {bloque}\nOcupado",
+            disabled=True,
+            key=f"ocupado_{bloque}"
+        )
+
+
+    # -------------------------------------------------
+    # SI ESTÁ DISPONIBLE
+    # -------------------------------------------------
+
+    else:
+
+        seleccionado = (
+            bloque in st.session_state.bloques_seleccionados
+        )
+
+        if seleccionado:
+            texto_boton = f"🔵 {bloque}\nSeleccionado"
+        else:
+            texto_boton = f"🟢 {bloque}\nDisponible"
+
+        if columna.button(
+            texto_boton,
+            key=f"boton_{bloque}"
+        ):
+
+            if seleccionado:
+
+                st.session_state.bloques_seleccionados.remove(
+                    bloque
+                )
+
+            else:
+
+                st.session_state.bloques_seleccionados.append(
+                    bloque
+                )
 
 # --- Validación ---
 if not nombre or not correo:
@@ -211,7 +272,7 @@ else:
         ocupados = obtener_eventos_del_dia(fecha)
         errores = []
 
-        for bloque in bloques_seleccionados:
+        for bloque in st.session_state.bloques_seleccionados:
 
             hora = bloques_fijos[bloque]
             duracion = 60
@@ -295,4 +356,3 @@ else:
                 "✅ ¡Todos los bloques fueron reservados correctamente!"
             )
             st.balloons()
-
