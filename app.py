@@ -124,7 +124,7 @@ nombre_responsable = st.text_input("Ingrese nombre de profesor/a o persona respo
 correo_responsable = st.text_input("Ingrese Correo electrónico de profesor/a o persona responsable")
 #Apartado de documentos éticos
 st.markdown(
-    '<span style="color:#4BA6FF; font-size:14px;">'
+    '<span style="color:#4BC0FF; font-size:15px;">'
     'Documentos éticos<br>'
     'El uso de consentimientos informados debe estar aprobado por el CEC o comité ético de la facultad y ser enviados a este correo: cicc.utalca@gmail.com'
     '</span>',
