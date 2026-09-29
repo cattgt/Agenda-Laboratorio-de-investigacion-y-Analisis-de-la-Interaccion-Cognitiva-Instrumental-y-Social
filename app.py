@@ -116,7 +116,7 @@ def hora_ocupada(hora_bloque, sector, lista_ocupados):
     return False
 
 # --- 3. Crear evento ---
-st.header("🗓️ Reserva una sala del laboratorio⏰")
+st.header("🗓️ Reserva una sala del laboratorio")
 nombre = st.text_input("Tu nombre completo")
 correo = st.text_input("Ingrese Correo electrónico")
 nombre_responsable = st.text_input("Ingrese nombre de profesor/a o persona responsable")
