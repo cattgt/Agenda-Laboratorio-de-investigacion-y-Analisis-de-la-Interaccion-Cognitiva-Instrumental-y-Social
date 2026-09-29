@@ -116,7 +116,7 @@ def hora_ocupada(hora_bloque, sector, lista_ocupados):
     return False
 
 # --- 3. Crear evento ---
-st.header("📌 Reserva una sala del laboratorio")
+st.header("🗓️ Reserva una sala del laboratorio⏰")
 nombre = st.text_input("Tu nombre completo")
 correo = st.text_input("Ingrese Correo electrónico")
 nombre_responsable = st.text_input("Ingrese nombre de profesor/a o persona responsable")
@@ -155,21 +155,6 @@ motivo = st.selectbox(
 )
 
 fecha = st.date_input("Fecha de reserva", dt.date.today())
-
-#bloques_disponibles = {
-    #"08:00 - 08:59": (dt.time(8, 00), 60),
-    #"09:00 - 09:59": (dt.time(9, 00), 60),
-    #"10:00 - 10:59": (dt.time(10, 00), 60),
-    #"11:00 - 11:59": (dt.time(11, 00), 60),
-    #"12:00 - 12:59": (dt.time(12, 00), 60),
-    #"13:00 - 13:59": (dt.time(13, 00), 60),
-    #"14:00 - 14:59": (dt.time(14, 00), 60),
-    #"15:00 - 15:59": (dt.time(15, 00), 60),
-    #"16:00 - 16:59": (dt.time(16, 00), 60),
-    #"17:00 - 17:59": (dt.time(17, 00), 60),
-    #"18:00 - 18:59": (dt.time(18, 00), 60),
-    #"19:00 - 19:59": (dt.time(19, 00), 60)
-#}
 
 # Obtener las reservas de Google Calendar
 ocupados = obtener_eventos_del_dia(fecha)
